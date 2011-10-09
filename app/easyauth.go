@@ -20,8 +20,8 @@ const (
 )
 
 func HashString( key []byte, hashThis string ) string {	
-	log.Println( "Hashing this string: ", hashThis )
-	log.Println( "SHA1 Key: ", key )
+	// log.Println( "Hashing this string: ", hashThis )
+	// log.Println( "SHA1 Key: ", key )
 	sha1 := hmac.NewSHA1( key )
 	sha1.Write( []byte( hashThis ) )
 	return base64.StdEncoding.EncodeToString( sha1.Sum() )
@@ -106,6 +106,6 @@ func GenerateSignature( resourceURL, method, consumerKey, consumerSecret string,
 	baseString += UrlEncode( GetOrderedParamString( params ) )
 	
 	signature = HashString( []byte( UrlEncode( consumerSecret ) + "&" ), baseString )
-	log.Println( "Signature: ", signature )
+	// log.Println( "Signature: ", signature )
 	return
 }
