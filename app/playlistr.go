@@ -4,53 +4,42 @@ import(
 	"http"
 	"log"
 	"io"
-	"strings"
-	"./easyauth"
+	"./rdio"
 )
 
-// API Key
-const clientId = "59r5gsu68egwjbsfu75azu9t"
-// Shared Secret
-const clientSecret = "GpUDUhbXXB"
-// API URL
-const apiUrl = "http://api.rdio.com/1/"
+func doSearch( res http.ResponseWriter, req *http.Request ){
 
-func getAlbumsForArtist( res http.ResponseWriter, req *http.Request ){
-	log.Printf( "Request for %v", req.URL.Raw )
-	
+	requiredParamErrorMessage := `Missing required parameter. Required parameters: "query", "type".
+query: A search query. Ex. "Brand New"
+types: The type of item to search for. Multiple values are comma-separated. Possible values: "artist," "album," "track."`
+
+	req.ParseForm();
+	query := req.Form.Get( "query" )
+	types := req.Form.Get( "types" )
+
+	if query == "" || types == "" {
+		res.WriteHeader( 400 )
+		io.WriteString( res, requiredParamErrorMessage )
+		return
+	}
+
+	method := "search"
 	params := make( map [string]string )
-	
-	params[ "method" ] = "search"
-	params[ "query" ] = "Brand New"
-	params[ "types" ] = "Artist,"
+	params[ "query" ] = query
+	params[ "types" ] = types
 
-	signature := easyauth.GenerateSignature(
-		apiUrl,
-		easyauth.POST,
-		clientId,
-		clientSecret,
-		params,
-	)
+	apiResponse := rdio.RequestFromService( method, params )
+	io.WriteString( res, apiResponse )
+}
 
-	params[ "oauth_signature" ] = string( signature )
-	fullParams := easyauth.GetOrderedParamString( params )
+func serveStaticFile( res http.ResponseWriter, req *http.Request ){
+	log.Println( "Serving static file ", req.URL.Path )
+	http.ServeFile( res, req, req.URL.Path )
+}
 
-	response, err := http.Post(
-		apiUrl,
-		"application/x-www-form-urlencoded",
-		strings.NewReader( fullParams ),
-	)
-	if err != nil {
-		log.Panic( "Couldn't send URL Request" )
-	}
-
-	apiResponse := make( []byte, response.ContentLength )
-	_, err = io.ReadFull( response.Body, apiResponse )
-	if err != nil {
-		log.Panic( "Couldn't read response from service" )
-	}
-	io.WriteString( res, string( apiResponse ) )
-
+func serveIndex( res http.ResponseWriter, req *http.Request ){
+	log.Println( "Serving index file for request ", req.URL.Path )
+	http.ServeFile( res, req, "www/index.html" )
 }
 
 func favicon( res http.ResponseWriter, req *http.Request ){
@@ -60,7 +49,10 @@ func favicon( res http.ResponseWriter, req *http.Request ){
 
 func main(){
 	http.HandleFunc( "/favicon.ico", favicon )
-	http.HandleFunc( "/", getAlbumsForArtist )
+	http.HandleFunc( "/api/search", doSearch )
+	http.HandleFunc( "/js/", serveStaticFile )
+	http.HandleFunc( "/css/", serveStaticFile )
+	http.HandleFunc( "/", serveIndex )
 
 	err := http.ListenAndServe( ":12345", nil )
 	if err != nil {
