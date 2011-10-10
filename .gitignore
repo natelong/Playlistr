@@ -2,3 +2,4 @@
 *.out
 app/bin
 www/js
+www-src/compiled
