@@ -1,2 +1,4 @@
 *.6
 *.out
+app/bin
+www/js
