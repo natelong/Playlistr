@@ -32,9 +32,34 @@ types: The type of item to search for. Multiple values are comma-separated. Poss
 	io.WriteString( res, apiResponse )
 }
 
+func doPlaybackToken( res http.ResponseWriter, req *http.Request ){
+
+	req.ParseForm();
+	domain := req.Form.Get( "domain" )
+
+	if domain == "" {
+		res.WriteHeader( 400 )
+		io.WriteString( res, "Call requires domain param." )
+		return
+	}
+
+	method := "getPlaybackToken"
+	params := make( map [string]string )
+	params[ "method" ] = method
+	params[ "domain" ] = domain
+
+	apiResponse := rdio.RequestFromService( method, params )
+	io.WriteString( res, apiResponse )
+}
+
 func serveStaticFile( res http.ResponseWriter, req *http.Request ){
 	log.Println( "Serving static file ", req.URL.Path )
 	http.ServeFile( res, req, "www" + req.URL.Path )
+}
+
+func serveApiIndex( res http.ResponseWriter, req *http.Request ){
+	log.Println( "Serving index file for request ", req.URL.Path )
+	http.ServeFile( res, req, "www/api.html" )
 }
 
 func serveIndex( res http.ResponseWriter, req *http.Request ){
@@ -50,6 +75,8 @@ func favicon( res http.ResponseWriter, req *http.Request ){
 func main(){
 	http.HandleFunc( "/favicon.ico", favicon )
 	http.HandleFunc( "/api/search", doSearch )
+	http.HandleFunc( "/api/getPlaybackToken", doPlaybackToken )
+	http.HandleFunc( "/api/", serveApiIndex )
 	http.HandleFunc( "/js/", serveStaticFile )
 	http.HandleFunc( "/css/", serveStaticFile )
 	http.HandleFunc( "/", serveIndex )
