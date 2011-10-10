@@ -5,7 +5,7 @@ import (
 	"log"
 	"strings"
 	"io"
-	"./easyauth"
+	"./app/bin/easyauth"
 )
 
 // API Key

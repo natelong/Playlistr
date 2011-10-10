@@ -4,7 +4,7 @@ import(
 	"http"
 	"log"
 	"io"
-	"./rdio"
+	"./app/bin/rdio"
 )
 
 func doSearch( res http.ResponseWriter, req *http.Request ){
@@ -34,7 +34,7 @@ types: The type of item to search for. Multiple values are comma-separated. Poss
 
 func serveStaticFile( res http.ResponseWriter, req *http.Request ){
 	log.Println( "Serving static file ", req.URL.Path )
-	http.ServeFile( res, req, req.URL.Path )
+	http.ServeFile( res, req, "www" + req.URL.Path )
 }
 
 func serveIndex( res http.ResponseWriter, req *http.Request ){
