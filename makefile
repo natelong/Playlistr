@@ -1,12 +1,13 @@
-all: app/bin/playlistr www/js/templates.js www/js/soyutils.js
+all: app/bin/playlistr www/js/playlistr.js
 go: app/bin/playlistr
-js: www/js/templates.js www/js/soyutils.js www/js/playlistr.js
+js: www/js/playlistr.js
+
 clean:
-	rm -rf app/bin www/js/templates.js
+	rm -rf app/bin www-src/compiled www/js/playlistr.js
 cleango:
 	rm -rf app/bin
 cleanjs:
-	rm www/js/templates.js www/js/playlistr.js
+	rm -rf www-src/compiled www/js/playlistr.js www/js/dev-playlistr.js
 
 # Main app files
 app/bin/playlistr: app/bin/easyauth.6 app/bin/rdio.6 app/bin/playlistr.6
@@ -24,11 +25,11 @@ app/bin/easyauth.6: app/easyauth.go
 	6g -o app/bin/easyauth.6 app/easyauth.go
 
 # JS template files
-www/js/templates.js:
-	java -jar templates/SoyToJsSrcCompiler.jar --outputPathFormat www/js/templates.js www-src/templates/*.soy
+www-src/compiled/templates.js:
+	mkdir www-src/compiled
+	java -jar templates/SoyToJsSrcCompiler.jar --outputPathFormat www-src/compiled/templates.js www-src/templates/*.soy
 
-www/js/soyutils.js: templates/soyutils.js
-	cp templates/soyutils.js www/js/soyutils.js
-
-www/js/playlistr.js: www/js/soyutils.js www/js/templates.js www-src/js/playlistr.js
-	java -jar compiler/compiler.jar --js www-src/js/playlistr.js --js www/js/templates.js --js www/js/soyutils.js --js_output_file www/js/playlistr.js
+www/js/playlistr.js: templates/soyutils.js www-src/compiled/templates.js
+	java -jar compiler/compiler.jar --js www-src/js/swfobject.js --js www-src/js/playlistr.js --js www-src/compiled/templates.js --js templates/soyutils.js --js_output_file www/js/playlistr.js
+	cat www-src/js/swfobject.js www-src/js/playlistr.js www-src/compiled/templates.js templates/soyutils.js > www/js/dev-playlistr.js
+	
