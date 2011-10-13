@@ -5,6 +5,20 @@
 </head>
 <body>
 	<div id="player"></div>
+	<div id="searchFormContainer">
+		<h2>Search:</h2>
+		<form id="searchForm">
+			<input name="query" type="text" id="queryBox" />
+			<input type="submit" value="Search" />
+			<label for="trackBox">Track</label>
+			<input type="checkbox" checked="checked" value="track," />
+			<label for="albumBox">Album</label>
+			<input type="checkbox" checked="checked" value="album," />
+			<label for="artistBox">Artist</label>
+			<input type="checkbox" checked="checked" value="artist," />
+		</form>
+	</div>
+	<div id="searchResultContainer"><!></div>
 	<script src="js/playlistr.js"></script>
 </body>
 </html>

@@ -57,6 +57,83 @@ var playlistr = (function(){
 		}
 	};
 
+	/**
+	 * Set up Search box and whatnot
+	 */
+	var setupSearch = function setupSearch(){
+		document.querySelector( '#searchForm' ).addEventListener( 'submit', clientSearch, false );
+		document.querySelector( '#searchResultContainer' ).addEventListener( 'submit', handleResultEvent, false );
+	};
+	
+	/**
+	 * Handle an event from the search results, like play, add, etc.
+	 */
+	var handleResultEvent = function handleResultEvent( e ){
+		var playFormRegex = /playForm/;
+		var target = e.target;
+		var sourceKey;
+
+		if( playFormRegex.test( target.className ) ){
+			e.preventDefault();
+			sourceKey = target.querySelector( 'input[name=key]' ).value;
+			player.rdio_play( sourceKey );
+		}
+	};
+
+	/**
+	 * Do the actual search
+	 */
+	var doSearch = function doSearch( query, types, onComplete, onFail ){
+		var args = {
+			query: query,
+			types: types
+		}
+		
+		get( 'search', args, onComplete, onFail );
+	};
+
+	/**
+	 * Gather the params to search on
+	 */
+	var gatherSearchParams = function gatherSearchParams(){
+		var i, len;
+		var query = document.querySelector( '#queryBox' ).value;
+		var typeFields = document.querySelectorAll( '#searchForm input[type=checkbox]:checked' );
+		var types = '';
+
+		for( i = 0, len = typeFields.length; i < len; i++ ){
+			types += typeFields[ i ].value;
+		}
+		return {
+			query: query,
+			types: types
+		}
+	};
+
+	/**
+	 * Client Search
+	 */
+	var clientSearch = function clientSearch( e ){
+		e.preventDefault();
+		var searchParams = gatherSearchParams();
+		doSearch( searchParams.query, searchParams.types, outputSearchResultsToPage, outputToConsole );
+	};
+
+	/**
+	 * Output the search results to the search results area
+	 */
+	var outputSearchResultsToPage = function outputSearchResultsToPage( results ){
+		try{
+			var resultObject = JSON.parse( results );
+		}catch( e ){
+			console.error( 'Failed to output results to page: ', e );
+			return
+		}
+
+		var searchResultsString = playlistr.templates.searchResults( resultObject.result );
+		document.querySelector( '#searchResultContainer' ).innerHTML = searchResultsString;
+	};
+
 	return{
 		/**
 		 * initialize the playlistr app
@@ -95,6 +172,7 @@ var playlistr = (function(){
 				embedPlayer( token );
 			};
 			this.getPlaybackToken( onTokenReceived );
+			setupSearch();
 		},
 		getPlayer: function getPlayer(){
 			return player;
@@ -119,6 +197,12 @@ var playlistr = (function(){
 				types: 'artist'
 			};
 			get( 'search', args, outputToConsole, outputToConsole );
+		},
+		/**
+		 * Do an arbitrary search
+		 */
+		search: function search( query, types ){
+			doSearch( query, types, outputToConsole, outputToConsole );
 		},
 		getPlaybackToken: function getPlaybackToken( onComplete, onFail ){
 			onComplete = onComplete || outputToConsole;
