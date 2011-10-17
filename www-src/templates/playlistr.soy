@@ -1,0 +1,28 @@
+{namespace playlistr.templates}
+
+/**
+ * Outputs a search result to the page
+ * @param results The search results to output to the page
+ */
+{template .searchResults}
+	{foreach $result in $results}
+		<div class="result">
+			{if $result.type == 't'}
+				<h3>Track: {$result.name}</h3>
+				<h3>Artist: {$result.albumArtist}</h3>
+				<h3>Album: {$result.album}</h3>
+			{/if}
+			{if $result.type == 'a'}
+				<h3>Album: {$result.name}</h3>
+				<h3>Artist: {$result.artist}</h3>
+			{/if}
+			{if $result.type == 'r'}
+				<h3>Artist: {$result.name}</h3>
+			{/if}
+			<form class="playForm">
+				<input type="hidden" value="{$result.key}" name="key" />
+				<input type="submit" value="Play" />
+			</form>
+		</div>
+	{/foreach}
+{/template}
