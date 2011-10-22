@@ -3,3 +3,5 @@
 app/bin
 www/js
 www-src/compiled
+*.sublime-workspace
+*.sublime-project
