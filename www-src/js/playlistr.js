@@ -1,7 +1,6 @@
 var playlistr = (function(){
 	var apiUrl = '/api/';
 	var playerId = 'player';
-	var states = [ 'paused', 'playing', 'stopped', 'buffering', 'paused' ];
 
 	// vars for the player
 	var player = new Player( playerId );
