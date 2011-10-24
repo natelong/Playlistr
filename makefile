@@ -22,16 +22,18 @@ app/bin/rdio.6: app/rdio.go
 	6g -o app/bin/rdio.6 app/rdio.go
 
 app/bin/easyauth.6: app/easyauth.go
-	mkdir app/bin
+	mkdir -p app/bin
 	6g -o app/bin/easyauth.6 app/easyauth.go
 
 # JS template files
 www-src/compiled/templates.js:
-	mkdir www-src/compiled
+	mkdir -p www-src/compiled
 	java -jar templates/SoyToJsSrcCompiler.jar --outputPathFormat www-src/compiled/templates.js www-src/templates/*.soy
 
 www/js/playlistr.js: www-src/compiled/templates.js
+	mkdir -p www/js
 	java -jar compiler/compiler.jar --js www-src/js/swfobject.js --js www-src/js/helpers.js --js www-src/js/Service.js --js www-src/js/ClientSearch.js --js www-src/js/Player.js --js www-src/js/playlistr.js --js www-src/compiled/templates.js --js templates/soyutils.js --js_output_file www/js/playlistr.js
 
 www/js/dev-playlistr.js: www-src/compiled/templates.js
+	mkdir -p www/js
 	cat www-src/js/swfobject.js www-src/js/helpers.js www-src/js/Service.js www-src/js/ClientSearch.js www-src/js/Player.js www-src/js/playlistr.js www-src/compiled/templates.js templates/soyutils.js > www/js/dev-playlistr.js
