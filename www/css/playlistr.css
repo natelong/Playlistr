@@ -12,7 +12,48 @@ body{
 	left: 0px;
 	width: 100%;
 	background: #eee;
+	overflow: hidden;
 }
 #playerStatus{
 	padding: 10px;
+	float: left;
+}
+
+#trackProgressOuter{
+	float: left;
+	width: 200px;
+	height: 18px;
+	margin: 10px;
+	background: #ddd;
+}
+#trackProgress{
+	background: #ccc;
+	height: 100%;
+}
+
+#searchResultContainer,
+#playlistContainer{
+	float:left;
+	width: 50%;
+	min-height: 200px;
+}
+.result{
+	margin: 10px 0 0 0;
+	float:left;
+	clear: left;
+	overflow: hidden;
+}
+.result > .info{
+	float: left;
+}
+.result > .info > p{
+	margin: 0 0 3px 0;
+}
+.result > .icon{
+	float: left;
+	margin: 0 10px 0 0;
+}
+.result > .icon > img{
+	width: 100px;
+	height: 100px;
 }

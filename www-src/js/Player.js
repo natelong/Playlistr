@@ -7,6 +7,11 @@ Player.prototype.statusElement = null;
 Player.prototype.currentState = null;
 Player.prototype.currentTrack = null;
 
+Player.prototype.analyzerDefaults = {
+	period: 100,
+	frequencies: '8-band'
+};
+
 Player.prototype.states = [
 	'Paused',
 	'Playing',
@@ -24,7 +29,7 @@ Player.prototype.embedPlayer = function embedPlayer( token ){
 	var flashvars = {
 		playbackToken: token,
 		domain: document.domain,
-		listener: 'playlistr.player'
+		listener: 'playlistr.player.callbacks'
 	};
 	var params = {
 		allowScriptAccess: 'always'
@@ -41,8 +46,12 @@ Player.prototype.embedPlayer = function embedPlayer( token ){
 		params,
 		attributes
 	);
+
 	this.playerElement = document.querySelector( '#' + this.playerId );
 	this.statusElement = document.querySelector( '#playerStatus' );
+	this.trackProgressElement = document.querySelector( '#trackProgress' );
+
+	this.callbacks.parent = this;
 };
 
 /**
@@ -53,7 +62,22 @@ Player.prototype.updateStatus = function updateStatus(){
 		track: this.currentTrack,
 		status: this.states[ this.currentState ]
 	});
-}
+};
+
+/**
+ * Start analyzing the stream frequency
+ */
+Player.prototype.startAnalyzer = function startAnalyzer( options ){
+	var analyzerOptions = options || this.analyzerDefaults;
+	this.playerElement.rdio_startFrequencyAnalyzer( analyzerOptions );
+};
+
+/**
+ * Stop analyzing the stream frequency
+ */
+Player.prototype.stopAnalyzer = function stopAnalyzer(){
+	this.playerElement.rdio.stopFrequencyAnalyzer();
+};
 
 /**
  * Immediately play content from the selected source.
@@ -70,40 +94,11 @@ Player.prototype.pause = function pause(){
 };
 
 /**
- * A function to call when the player has been initialized completely
+ * Queue up a set of tracks
  */
-Player.prototype.ready = function ready(){
-	console.log( 'Player Ready' );
-	this.statusElement.innerHTML = 'Ready when you are :)';
-};
-
-/**
- * When the player state changes, respond to 
- */
-Player.prototype.playStateChanged = function playStateChanged( playState ) {
-	this.currentState = playState;
-
-	this.updateStatus();
-
-	switch( playState ){
-		case 0:
-		break;
-		case 1:
-		break;
-		case 2: //stopped
-		break;
-		case 3:
-		break;
-		case 4:
-		break;
+Player.prototype.addTracks = function addTracks( tracks ){
+	var i, len;
+	for( i = 0, len = tracks.length; i < len; i++ ){
+		this.playerElement.rdio_queue( tracks[ i ].Key );
 	}
 };
-
-/**
- * When the current track changes
- */
-Player.prototype.playingTrackChanged = function playingTrackChanged( playingTrack, sourcePosition ){
-	if( playingTrack ){
-		this.currentTrack = playingTrack;
-	}
-}

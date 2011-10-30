@@ -11,7 +11,11 @@ var playlistr = (function(){
 	// vars for the client search object
 	var searchForm = document.querySelector( '#searchForm' );
 	var resultsArea = document.querySelector( '#searchResultContainer' )
+	var playlistArea = document.querySelector( '#playlistContainer' )
 	var clientSearch = new ClientSearch( searchForm, resultsArea );
+
+	// vars for the playlist management service
+	var playlist = new Playlist( resultsArea, playlistArea );
 
 	return{
 		/**
@@ -52,7 +56,8 @@ var playlistr = (function(){
 		},		
 		service: service,
 		player: player,
-		clientSearch: clientSearch
+		clientSearch: clientSearch,
+		playlist: playlist
 	};
 }());
 

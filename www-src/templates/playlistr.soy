@@ -7,22 +7,37 @@
 {template .searchResults}
 	{foreach $result in $results}
 		<div class="result">
-			{if $result.type == 't'}
-				<h3>Track: {$result.name}</h3>
-				<h3>Artist: {$result.albumArtist}</h3>
-				<h3>Album: {$result.album}</h3>
-			{/if}
-			{if $result.type == 'a'}
-				<h3>Album: {$result.name}</h3>
-				<h3>Artist: {$result.artist}</h3>
-			{/if}
-			{if $result.type == 'r'}
-				<h3>Artist: {$result.name}</h3>
-			{/if}
-			<form class="playForm">
-				<input type="hidden" value="{$result.key}" name="key" />
-				<input type="submit" value="Play" />
-			</form>
+			<div class="icon">
+				<img src="{$result.icon}" alt="{$result.name}" />
+			</div>
+			<div class="info">
+				{if $result.type == 't'}
+					<p><strong>Track:</strong> {$result.name}</p>
+					<p><strong>Artist:</strong> {$result.albumArtist}</p>
+					<p><strong>Album:</strong> {$result.album}</p>
+				{/if}
+				{if $result.type == 'a'}
+					<p><strong>Album:</strong> {$result.name}</p>
+					<p><strong>Artist:</strong> {$result.artist}</p>
+				{/if}
+				{if $result.type == 'r'}
+					<p><strong>Artist:</strong> {$result.name}</p>
+				{/if}
+				{if $result.canStream}
+					<form class="playForm">
+						<input type="hidden" value="{$result.key}" name="key" />
+						<input type="submit" value="Play" />
+					</form>
+					<form class="addForm">
+						<input type="hidden" value="{$result.key}" name="key" />
+						<input type="hidden" value="{$result.name}" name="name" />
+						<input type="hidden" value="{$result.album}" name="album" />
+						<input type="hidden" value="{$result.albumArtist}" name="artist" />
+						<input type="hidden" value="{$result.icon}" name="thumb" />
+						<input type="submit" value="Add" />
+					</form>
+				{/if}
+			</div>
 		</div>
 	{/foreach}
 {/template}
@@ -34,4 +49,23 @@
  */
 {template .trackInfo}
 	{$status}: <strong>{$track.name}</strong> - {$track.artist}
+{/template}
+
+/**
+ * Outputs a search result to the page
+ * @param results The playlist items to output to the page
+ */
+{template .playlistItems}
+	{foreach $result in $results}
+		<div class="result">
+			<div class="icon">
+				<img src="{$result.Thumb}" alt="{$result.Name}" />
+			</div>
+			<div class="info">
+				<p><strong>Track:</strong> {$result.Name}</p>
+				<p><strong>Artist:</strong> {$result.Artist}</p>
+				<p><strong>Album:</strong> {$result.Album}</p>
+			</div>
+		</div>
+	{/foreach}
 {/template}

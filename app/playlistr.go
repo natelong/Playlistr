@@ -4,8 +4,106 @@ import(
 	"http"
 	"log"
 	"io"
+	"websocket"
 	"./app/bin/rdio"
+	"./app/bin/playlist"
 )
+
+type subscription struct {
+	conn		*websocket.Conn
+	subscribe	bool
+}
+
+type message struct {
+	conn 		*websocket.Conn
+	text		[]byte
+}
+
+var messageChan = make( chan message )
+var subscriptionChan = make( chan subscription )
+var conns = make( map[*websocket.Conn]int )
+var connections = make( map[int]*websocket.Conn )
+
+func main(){
+	go pubHub()
+	go subHub()
+
+	http.HandleFunc( "/favicon.ico", favicon )
+	http.HandleFunc( "/api/search", doSearch )
+	http.HandleFunc( "/api/getPlaybackToken", doPlaybackToken )
+	http.HandleFunc( "/api/", serveApiIndex )
+	http.HandleFunc( "/js/", serveStaticFile )
+	http.HandleFunc( "/css/", serveStaticFile )
+	http.HandleFunc( "/", serveIndex )
+
+	http.Handle( "/event", websocket.Handler( doEventStream ) )
+
+	err := http.ListenAndServe( ":12345", nil )
+	if err != nil {
+		log.Fatal( "ListenAndServe: ", err.String() )
+	}
+}
+
+func Publish( message []byte, key int ){
+	if key == -1{
+		log.Println( "Publishing to all connections" )
+		for conn, _ := range conns{
+			if _, err := conn.Write( message ); err != nil {
+				conn.Close()
+			}
+		}
+	}else{
+		log.Printf( "Publishing to specific connection: %v", key )
+		connections[ key ].Write( message )
+	}
+}
+
+func pubHub(){
+	for{
+		message := <- messageChan
+		playlist.HandleRequest( message.text, Publish, conns[ message.conn ] )
+	}
+}
+
+func subHub(){
+	for{
+		subscription := <- subscriptionChan
+
+		if subscription.subscribe{
+			connectionIndex := len( conns )
+			conns[ subscription.conn ] = connectionIndex
+			connections[ connectionIndex ] = subscription.conn
+		}else{
+			connectionIndex := conns[ subscription.conn ]
+			conns[ subscription.conn ] = 0, false
+			connections[ connectionIndex ] = subscription.conn, false
+		}
+	}
+}
+
+func doEventStream( ws *websocket.Conn ){
+	defer func(){
+		subscriptionChan <- subscription{ ws, false }
+		ws.Close()
+	}()
+
+	subscriptionChan <- subscription{ ws, true }
+
+	for{
+		buf := make( []byte, 1024 )
+
+		n, err := ws.Read( buf )
+		if err != nil {
+			log.Println( "Error reading from websocket connection" )
+			break;
+		}
+
+		messageChan <- message{
+			ws,
+			buf[ 0:n ],
+		}
+	}
+}
 
 func doSearch( res http.ResponseWriter, req *http.Request ){
 
@@ -70,19 +168,4 @@ func serveIndex( res http.ResponseWriter, req *http.Request ){
 func favicon( res http.ResponseWriter, req *http.Request ){
 	log.Println( "Serving favicon" )
 	res.WriteHeader( 204 );
-}
-
-func main(){
-	http.HandleFunc( "/favicon.ico", favicon )
-	http.HandleFunc( "/api/search", doSearch )
-	http.HandleFunc( "/api/getPlaybackToken", doPlaybackToken )
-	http.HandleFunc( "/api/", serveApiIndex )
-	http.HandleFunc( "/js/", serveStaticFile )
-	http.HandleFunc( "/css/", serveStaticFile )
-	http.HandleFunc( "/", serveIndex )
-
-	err := http.ListenAndServe( ":12345", nil )
-	if err != nil {
-		log.Fatal( "ListenAndServe: ", err.String() )
-	}
 }
