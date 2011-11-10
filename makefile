@@ -3,19 +3,19 @@
 compiler = /Users/nate/src/go2/bin/6g
 linker = /Users/nate/src/go2/bin/6l
 
-all: go js
-dev: go devjs
+all: app client
+dev: app devclient
 
-go: app/bin/playlistr
-js: www/js/playlistr.js www/js/dev-playlistr.js
+app: app/bin/playlistr
+client: www/js/playlistr.js www/js/dev-playlistr.js
 	rm -rf www-src/compiled
-devjs: www/js/dev-playlistr.js
+devclient: www/js/dev-playlistr.js
 	rm -rf www-src/compiled
 
-clean: cleango cleanjs
-cleango:
+clean: cleanapp cleanclient
+cleanapp:
 	rm -rf app/bin
-cleanjs:
+cleanclient:
 	rm -rf www-src/compiled www/js
 
 # Main app files
