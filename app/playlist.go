@@ -40,7 +40,8 @@ func HandleRequest( request []byte, pubCallback func( []byte, int ), callbackKey
 			callbackKey = -1
 			response = AddTrackToPlaylist( requestObj.Target )
 		case ACTION_REMOVE:
-			response = []byte( "Remove track from playlist" )
+			callbackKey = -1
+			response = RemoveTrackFromPlaylist( requestObj.Target.Key )
 		case ACTION_REORDER:
 			response = []byte( "Reorder track in playlist" )
 		case ACTION_GET:
@@ -62,6 +63,11 @@ func AddTrackToPlaylist( track Track ) ( response []byte ){
 	track.Order = len( playlist )
 	playlist[ track.Key ] = track
 	
-	response, _ = json.Marshal( track )
-	return response
+	return GetPlaylist()
+}
+
+func RemoveTrackFromPlaylist( key string ) ( response []byte ) {
+	playlist[ key ] = playlist[ key ], false
+
+	return GetPlaylist()
 }

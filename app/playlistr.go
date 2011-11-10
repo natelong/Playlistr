@@ -24,6 +24,9 @@ var subscriptionChan = make( chan subscription )
 var conns = make( map[*websocket.Conn]int )
 var connections = make( map[int]*websocket.Conn )
 
+var master = -1
+var lastConnectionIndex = 0;
+
 func main(){
 	go pubHub()
 	go subHub()
@@ -69,14 +72,28 @@ func subHub(){
 	for{
 		subscription := <- subscriptionChan
 
-		if subscription.subscribe{
-			connectionIndex := len( conns )
+		if subscription.subscribe {
+			connectionIndex := lastConnectionIndex
+			lastConnectionIndex += 1
 			conns[ subscription.conn ] = connectionIndex
 			connections[ connectionIndex ] = subscription.conn
+
+			if master == -1{
+				master = connectionIndex
+				log.Printf( "No current master. New playlist master: %v", master )
+			}
 		}else{
 			connectionIndex := conns[ subscription.conn ]
 			conns[ subscription.conn ] = 0, false
 			connections[ connectionIndex ] = subscription.conn, false
+
+			if master == connectionIndex {
+				for index, _ := range connections {
+					master = index
+					break
+				}
+				log.Printf( "Old master quit. New playlist master: %v", master )
+			}
 		}
 	}
 }
@@ -90,7 +107,7 @@ func doEventStream( ws *websocket.Conn ){
 	subscriptionChan <- subscription{ ws, true }
 
 	for{
-		buf := make( []byte, 1024 )
+		buf := make( []byte, 512 )
 
 		n, err := ws.Read( buf )
 		if err != nil {
