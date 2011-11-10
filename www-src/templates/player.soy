@@ -1,0 +1,10 @@
+{namespace playlistr.templates}
+
+/**
+ * Outputs the information about the currently playing track
+ * @param track The track that is now currently playing
+ * @param status The current player status
+ */
+{template .trackInfo}
+	{$status}: <strong>{$track.name}</strong> - {$track.artist}
+{/template}

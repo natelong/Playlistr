@@ -41,31 +41,3 @@
 		</div>
 	{/foreach}
 {/template}
-
-/**
- * Outputs the information about the currently playing track
- * @param track The track that is now currently playing
- * @param status The current player status
- */
-{template .trackInfo}
-	{$status}: <strong>{$track.name}</strong> - {$track.artist}
-{/template}
-
-/**
- * Outputs a search result to the page
- * @param results The playlist items to output to the page
- */
-{template .playlistItems}
-	{foreach $result in $results}
-		<div class="result">
-			<div class="icon">
-				<img src="{$result.Thumb}" alt="{$result.Name}" />
-			</div>
-			<div class="info">
-				<p><strong>Track:</strong> {$result.Name}</p>
-				<p><strong>Artist:</strong> {$result.Artist}</p>
-				<p><strong>Album:</strong> {$result.Album}</p>
-			</div>
-		</div>
-	{/foreach}
-{/template}
